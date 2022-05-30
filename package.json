@@ -1,0 +1,21 @@
+{
+  "name": "@yoursunny/webcrypto-ed25519",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.js",
+  "browser": "browser.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "xo-yoursunny --fix"
+  },
+  "packageManager": "pnpm@7.1.7",
+  "dependencies": {
+    "@noble/ed25519": "^1.6.0",
+    "@yoursunny/asn1": "^0.0.20200718",
+    "b64u-lite": "^1.1.0"
+  },
+  "devDependencies": {
+    "@yoursunny/xo-config": "^0.49.0",
+    "typescript": "^4.7.2"
+  }
+}
