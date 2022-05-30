@@ -5,7 +5,7 @@ const { js, ts, web, merge } = require("@yoursunny/xo-config");
 
 /** @type {XoOptions} */
 module.exports = {
-  ...js,
+  ...merge(js, web),
   overrides: [
     {
       files: [
