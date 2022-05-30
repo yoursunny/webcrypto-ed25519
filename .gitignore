@@ -1,5 +1,6 @@
 /*.js
 /*.map
+/*.tgz
 node_modules
 /pnpm-lock.yaml
 /test/bundle.*

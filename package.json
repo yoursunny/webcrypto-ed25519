@@ -1,9 +1,26 @@
 {
   "name": "@yoursunny/webcrypto-ed25519",
-  "version": "0.0.0",
+  "version": "0.0.20220530",
+  "description": "Ed25519 Ponyfill & Polyfill for WebCrypto",
+  "keywords": [
+    "webcrypto",
+    "crypto",
+    "crypto.subtle",
+    "SubtleCrypto",
+    "Ed25519",
+    "RFC8032",
+    "RFC8037"
+  ],
+  "author": "Junxiao Shi <npm@mail1.yoursunny.com>",
+  "license": "MIT",
+  "files": [
+    "index.*",
+    "browser.*"
+  ],
   "type": "module",
   "main": "index.js",
   "browser": "browser.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "xo-yoursunny --fix",
