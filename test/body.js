@@ -1,10 +1,5 @@
 import assert from "minimalistic-assert";
 
-const algo = {
-  name: "NODE-ED25519",
-  namedCurve: "NODE-ED25519",
-};
-
 const plaintext = new TextEncoder().encode("eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc");
 const expectedSignature = Uint8Array.of(
   0x86, 0x0C, 0x98, 0xD2, 0x29, 0x7F, 0x30, 0x60, 0xA3, 0x3F, 0x42, 0x73, 0x96, 0x72, 0xD6, 0x1B,
@@ -14,10 +9,11 @@ const expectedSignature = Uint8Array.of(
 
 /**
  * @param {SubtleCrypto} subtle
+ * @param {KeyAlgorithm & AlgorithmIdentifier} algo
  * @param {CryptoKey} privateKey
  * @param {CryptoKey} publicKey
  */
-async function testKeyPair(subtle, privateKey, publicKey) {
+async function testKeyPair(subtle, algo, privateKey, publicKey) {
   const pvtJwk = await subtle.exportKey("jwk", privateKey);
   privateKey = await subtle.importKey("jwk", pvtJwk, algo, true, ["sign"]);
   const pubJwk = await subtle.exportKey("jwk", publicKey);
@@ -27,19 +23,21 @@ async function testKeyPair(subtle, privateKey, publicKey) {
   const pubSpki = await subtle.exportKey("spki", publicKey);
   publicKey = await subtle.importKey("spki", pubSpki, algo, true, ["verify"]);
 
-  const sig = await subtle.sign(algo.name, privateKey, plaintext);
-  const verified = await subtle.verify(algo.name, publicKey, sig, plaintext);
+  const sig = await subtle.sign(algo, privateKey, plaintext);
+  const verified = await subtle.verify(algo, publicKey, sig, plaintext);
   assert(verified);
   return sig;
 }
 
 /**
  * @param {SubtleCrypto} subtle
+ * @param {KeyAlgorithm & AlgorithmIdentifier} algo
  * @returns {Promise<void>}
  */
-export async function testSubtleCrypto(subtle) {
+export async function testSubtleCrypto(subtle, algo) {
+  console.log(algo);
   const { privateKey, publicKey } = await subtle.generateKey(algo, true, ["sign", "verify"]);
-  await testKeyPair(subtle, privateKey, publicKey);
+  await testKeyPair(subtle, algo, privateKey, publicKey);
 
   // https://datatracker.ietf.org/doc/html/rfc8037#appendix-A
   const pvt = await subtle.importKey("jwk", {
@@ -53,7 +51,7 @@ export async function testSubtleCrypto(subtle) {
     crv: "Ed25519",
     x: "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
   }, algo, true, ["verify"]);
-  const sig = new Uint8Array(await testKeyPair(subtle, pvt, pub));
+  const sig = new Uint8Array(await testKeyPair(subtle, algo, pvt, pub));
   assert.equal(sig.length, expectedSignature.length);
   for (const [i, element] of sig.entries()) {
     assert.equal(element, expectedSignature[i]);

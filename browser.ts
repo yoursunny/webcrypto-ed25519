@@ -3,6 +3,12 @@ import * as asn1 from "@yoursunny/asn1";
 // @ts-expect-error no typing
 import { toBase64Url as b64encode, toBuffer as b64decode } from "b64u-lite";
 
+import { C, isEd25519Algorithm } from "./common.js";
+
+export const Ed25519Algorithm: KeyAlgorithm = {
+  name: C.wicgAlgorithm,
+};
+
 function asUint8Array(b: BufferSource): Uint8Array {
   if (b instanceof Uint8Array) {
     return b;
@@ -19,14 +25,6 @@ function asArrayBuffer(b: Uint8Array): ArrayBuffer {
   }
   return b.buffer.slice(b.byteOffset, b.byteLength);
 }
-
-const C = {
-  algorithm: "NODE-ED25519",
-  namedCurve: "NODE-ED25519",
-  kty: "OKP",
-  crv: "Ed25519",
-  oid: "2B6570".toLowerCase(),
-};
 
 const slot = "8d9df0f7-1363-4d2c-8152-ce4ed78f27d8";
 
@@ -48,8 +46,8 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
 
   private readonly orig_: Record<keyof SubtleCrypto, Function>;
 
-  public async generateKey(algorithm: EcKeyGenParams, extractable: boolean, keyUsages: Iterable<KeyUsage>): Promise<CryptoKeyPair> {
-    if (algorithm.name === C.algorithm && algorithm.namedCurve === C.namedCurve) {
+  public async generateKey(algorithm: KeyAlgorithm, extractable: boolean, keyUsages: Iterable<KeyUsage>): Promise<CryptoKeyPair> {
+    if (isEd25519Algorithm(algorithm)) {
       const pvt = ed.utils.randomPrivateKey();
       const pub = await ed.getPublicKey(pvt);
 
@@ -74,7 +72,7 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
   }
 
   public async exportKey(format: KeyFormat, key: CryptoKey): Promise<JsonWebKey | ArrayBuffer> {
-    if (key.algorithm.name === C.algorithm && key.extractable) {
+    if (isEd25519Algorithm(key.algorithm) && key.extractable) {
       const raw = (key as Ed25519CryptoKey)[slot];
       switch (format) {
         case "jwk": {
@@ -104,8 +102,8 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
     return this.orig_.exportKey.apply(this.super_, arguments);
   }
 
-  public async importKey(format: KeyFormat, keyData: JsonWebKey | BufferSource, algorithm: EcKeyImportParams, extractable: boolean, keyUsages: Iterable<KeyUsage>): Promise<CryptoKey> {
-    if (algorithm.name === C.algorithm && algorithm.namedCurve === C.namedCurve) {
+  public async importKey(format: KeyFormat, keyData: JsonWebKey | BufferSource, algorithm: Algorithm, extractable: boolean, keyUsages: Iterable<KeyUsage>): Promise<CryptoKey> {
+    if (isEd25519Algorithm(algorithm)) {
       const usages = Array.from(keyUsages);
       switch (format) {
         case "jwk": {
@@ -145,14 +143,14 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
   }
 
   public async sign(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): Promise<ArrayBuffer> {
-    if (algorithm === C.algorithm && key.algorithm.name === C.algorithm && key.type === "private" && key.usages.includes("sign")) {
+    if (isEd25519Algorithm(algorithm) && isEd25519Algorithm(key.algorithm) && key.type === "private" && key.usages.includes("sign")) {
       return asArrayBuffer(await ed.sign(asUint8Array(data), (key as Ed25519CryptoKey)[slot]));
     }
     return this.orig_.sign.apply(this.super_, arguments);
   }
 
   public async verify(algorithm: AlgorithmIdentifier, key: CryptoKey, signature: BufferSource, data: BufferSource): Promise<boolean> {
-    if (algorithm === C.algorithm && key.algorithm.name === C.algorithm && key.type === "public" && key.usages.includes("verify")) {
+    if (isEd25519Algorithm(algorithm) && isEd25519Algorithm(key.algorithm) && key.type === "public" && key.usages.includes("verify")) {
       return ed.verify(asUint8Array(signature), asUint8Array(data), (key as Ed25519CryptoKey)[slot]);
     }
     return this.orig_.verify.apply(this.super_, arguments);
