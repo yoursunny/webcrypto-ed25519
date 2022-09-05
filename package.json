@@ -1,6 +1,6 @@
 {
   "name": "@yoursunny/webcrypto-ed25519",
-  "version": "0.0.20220623",
+  "version": "0.0.20220904",
   "description": "Ed25519 Ponyfill & Polyfill for WebCrypto",
   "keywords": [
     "webcrypto",
