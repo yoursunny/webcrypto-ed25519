@@ -14,8 +14,8 @@ const nodeKeyAlgorithm: EcKeyAlgorithm = {
 };
 
 export const Ed25519Algorithm: KeyAlgorithm =
-  satisfies(nodeVersion, "^16.17.0") || satisfies(nodeVersion, "^18.4.0") ?
-    wicgKeyAlgorithm : nodeKeyAlgorithm;
+  satisfies(nodeVersion, "<18.4.0") && !satisfies(nodeVersion, "^16.17.0") ?
+    nodeKeyAlgorithm : wicgKeyAlgorithm;
 
 export function ponyfillEd25519(subtle = crypto.subtle): SubtleCrypto {
   return subtle;
