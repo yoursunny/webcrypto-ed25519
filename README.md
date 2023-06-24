@@ -30,7 +30,7 @@ The ponyfill and polyfill for browser recognize two forms of algorithm identifie
 * `{ name: "NODE-ED25519", namedCurve: "NODE-ED25519" }`, as implemented in Node.js 18.3.0 and earlier.
 
 This package does not provide any ponyfill or polyfill for Node.js.
-The exported `Ed25519Algorithm` variable gives a suitable algorithm identifier for the current Node.js version, which helps you writing code to support Node.js before and after 18.4.0.
+The exported `Ed25519Algorithm` variable gives a suitable algorithm identifier for the current Node.js version, which helps you write code to support Node.js before and after 18.4.0.
 
 ## Features
 

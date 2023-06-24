@@ -32,6 +32,7 @@ interface Ed25519CryptoKey extends CryptoKey {
   [slot]: Uint8Array;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class Ponyfill implements Record<keyof SubtleCrypto, Function> {
   constructor(private readonly super_: SubtleCrypto) {
     this.orig_ = {} as any;
@@ -49,7 +50,7 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
   public async generateKey(algorithm: KeyAlgorithm, extractable: boolean, keyUsages: Iterable<KeyUsage>): Promise<CryptoKeyPair> {
     if (isEd25519Algorithm(algorithm)) {
       const pvt = ed.utils.randomPrivateKey();
-      const pub = await ed.getPublicKey(pvt);
+      const pub = await ed.getPublicKeyAsync(pvt);
 
       const usages = Array.from(keyUsages);
       const privateKey: Ed25519CryptoKey = {
@@ -84,7 +85,7 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
             jwk.x = b64encode(raw);
           } else {
             jwk.d = b64encode(raw);
-            jwk.x = b64encode(await ed.getPublicKey(raw));
+            jwk.x = b64encode(await ed.getPublicKeyAsync(raw));
           }
           return jwk;
         }
@@ -125,7 +126,7 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
           const der = asn1.parseVerbose(asUint8Array(keyData as BufferSource));
           const algo = der.children?.[0]?.children?.[0]?.value;
           const raw = der.children?.[1]?.value;
-          if (!(algo instanceof Uint8Array) || ed.utils.bytesToHex(algo) !== C.oid || !(raw instanceof Uint8Array)) {
+          if (!(algo instanceof Uint8Array) || ed.etc.bytesToHex(algo) !== C.oid || !(raw instanceof Uint8Array)) {
             break;
           }
           const key: Ed25519CryptoKey = {
@@ -144,18 +145,19 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
 
   public async sign(algorithm: AlgorithmIdentifier, key: CryptoKey, data: BufferSource): Promise<ArrayBuffer> {
     if (isEd25519Algorithm(algorithm) && isEd25519Algorithm(key.algorithm) && key.type === "private" && key.usages.includes("sign")) {
-      return asArrayBuffer(await ed.sign(asUint8Array(data), (key as Ed25519CryptoKey)[slot]));
+      return asArrayBuffer(await ed.signAsync(asUint8Array(data), (key as Ed25519CryptoKey)[slot]));
     }
     return this.orig_.sign.apply(this.super_, arguments);
   }
 
   public async verify(algorithm: AlgorithmIdentifier, key: CryptoKey, signature: BufferSource, data: BufferSource): Promise<boolean> {
     if (isEd25519Algorithm(algorithm) && isEd25519Algorithm(key.algorithm) && key.type === "public" && key.usages.includes("verify")) {
-      return ed.verify(asUint8Array(signature), asUint8Array(data), (key as Ed25519CryptoKey)[slot]);
+      return ed.verifyAsync(asUint8Array(signature), asUint8Array(data), (key as Ed25519CryptoKey)[slot]);
     }
     return this.orig_.verify.apply(this.super_, arguments);
   }
 }
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 interface Ponyfill extends Record<keyof SubtleCrypto, Function> {}
 
 export function ponyfillEd25519(subtle = crypto.subtle): SubtleCrypto {

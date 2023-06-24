@@ -4,7 +4,7 @@ export const C = {
   nodeNamedCurve: "NODE-ED25519",
   kty: "OKP",
   crv: "Ed25519",
-  oid: "2B6570".toLowerCase(),
+  oid: "2b6570",
 } as const;
 
 export function isEd25519Algorithm(a: AlgorithmIdentifier | KeyAlgorithm): boolean {
