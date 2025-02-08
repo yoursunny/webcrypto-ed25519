@@ -11,7 +11,11 @@ module.exports = {
       files: [
         "*.ts",
       ],
-      ...merge(js, ts, web),
+      ...merge(js, ts, web, {
+        rules: {
+          "prefer-rest-params": "off",
+        },
+      }),
     },
   ],
 };

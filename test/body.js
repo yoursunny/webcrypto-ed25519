@@ -1,3 +1,4 @@
+import * as ed from "@noble/ed25519";
 import assert from "minimalistic-assert";
 
 const plaintext = new TextEncoder().encode("eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc");
@@ -52,8 +53,6 @@ export async function testSubtleCrypto(subtle, algo) {
     x: "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
   }, algo, true, ["verify"]);
   const sig = new Uint8Array(await testKeyPair(subtle, algo, pvt, pub));
-  assert.equal(sig.length, expectedSignature.length);
-  for (const [i, element] of sig.entries()) {
-    assert.equal(element, expectedSignature[i]);
-  }
+  const sigHex = ed.etc.bytesToHex(sig);
+  assert.equal(sigHex, ed.etc.bytesToHex(expectedSignature));
 }

@@ -5,9 +5,7 @@ import { toBase64Url as b64encode, toBuffer as b64decode } from "b64u-lite";
 
 import { C, isEd25519Algorithm } from "./common.js";
 
-export const Ed25519Algorithm: AlgorithmIdentifier = {
-  name: C.wicgAlgorithm,
-};
+export { Ed25519Algorithm } from "./common.js";
 
 function asUint8Array(b: BufferSource): Uint8Array {
   if (b instanceof Uint8Array) {
@@ -158,11 +156,41 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
 }
 interface Ponyfill extends Record<keyof SubtleCrypto, Function> {}
 
-export function ponyfillEd25519(subtle = crypto.subtle): SubtleCrypto {
-  return new Ponyfill(subtle) as unknown as SubtleCrypto;
+async function checkNativeSupport(): Promise<boolean> {
+  try {
+    // https://datatracker.ietf.org/doc/html/rfc8037#appendix-A
+    const jwk: JsonWebKey = {
+      kty: "OKP",
+      crv: "Ed25519",
+      d: "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A",
+      x: "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+    };
+    const pvt = await crypto.subtle.importKey("jwk", jwk, "Ed25519", false, ["sign"]);
+    delete jwk.d;
+    const pub = await crypto.subtle.importKey("jwk", jwk, "Ed25519", true, ["verify"]);
+    const data = new TextEncoder().encode("eyJhbGciOiJFZERTQSJ9.RXhhbXBsZSBvZiBFZDI1NTE5IHNpZ25pbmc");
+    const sig = await crypto.subtle.sign("Ed25519", pvt, data);
+    const verified = await crypto.subtle.verify("Ed25519", pub, sig, data);
+    return verified && ed.etc.bytesToHex(new Uint8Array(sig)) ===
+      "860c98d2297f3060a33f42739672d61b53cf3adefed3d3c672f320dc021b411e9d59b8628dc351e248b88b29468e0e41855b0fb7d83bb15be902bfccb8cd0a02";
+  } catch {
+    return false;
+  }
+}
+
+export const hasNativeSupport = await checkNativeSupport();
+
+export function ponyfillEd25519(): SubtleCrypto {
+  if (hasNativeSupport) {
+    return crypto.subtle;
+  }
+  return new Ponyfill(crypto.subtle) as unknown as SubtleCrypto;
 }
 
 export function polyfillEd25519(): void {
+  if (hasNativeSupport) {
+    return;
+  }
   Object.defineProperty(globalThis.crypto, "subtle", {
     value: ponyfillEd25519(),
     configurable: true,

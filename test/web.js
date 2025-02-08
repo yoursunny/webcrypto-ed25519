@@ -1,6 +1,7 @@
-import { Ed25519Algorithm, polyfillEd25519, ponyfillEd25519 } from "../browser.js";
+import { Ed25519Algorithm, hasNativeSupport, polyfillEd25519, ponyfillEd25519 } from "../browser.js";
 import { testSubtleCrypto } from "./body.js";
 
+document.querySelector("#mode").textContent = hasNativeSupport ? "native" : "polyfill";
 const $message = document.querySelector("#message");
 
 try {
