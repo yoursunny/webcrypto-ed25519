@@ -1,7 +1,17 @@
 import { Ed25519Algorithm, polyfillEd25519, ponyfillEd25519 } from "../browser.js";
 import { testSubtleCrypto } from "./body.js";
 
-await testSubtleCrypto(ponyfillEd25519(), Ed25519Algorithm);
+const $message = document.querySelector("#message");
 
-polyfillEd25519();
-await testSubtleCrypto(crypto.subtle, Ed25519Algorithm);
+try {
+  const t0 = Date.now();
+
+  await testSubtleCrypto(ponyfillEd25519(), Ed25519Algorithm);
+
+  polyfillEd25519();
+  await testSubtleCrypto(crypto.subtle, Ed25519Algorithm);
+
+  $message.textContent = `PASS ${Date.now() - t0}ms`;
+} catch (err) {
+  $message.textContent = err.message;
+}
