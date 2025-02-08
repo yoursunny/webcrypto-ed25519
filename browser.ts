@@ -5,7 +5,7 @@ import { toBase64Url as b64encode, toBuffer as b64decode } from "b64u-lite";
 
 import { C, isEd25519Algorithm } from "./common.js";
 
-export const Ed25519Algorithm: KeyAlgorithm = {
+export const Ed25519Algorithm: AlgorithmIdentifier = {
   name: C.wicgAlgorithm,
 };
 

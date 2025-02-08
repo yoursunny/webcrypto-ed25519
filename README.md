@@ -24,13 +24,10 @@ crypto.subtle.generateKey(Ed25519Algorithm, true, ["sign", "verify"]);
 
 ## Algorithm Identifier
 
-The ponyfill and polyfill for browser recognize two forms of algorithm identifier:
+The ponyfill and polyfill for browser recognize the algorithm identifier `{ name: "Ed25519" }`, as specified in [Secure Curves in the Web Cryptography API](https://wicg.github.io/webcrypto-secure-curves/) draft.
 
-* `{ name: "Ed25519" }`, as specified in [Secure Curves in the Web Cryptography API](https://wicg.github.io/webcrypto-secure-curves/) draft and implemented in Node.js 18.4.0 and later.
-* `{ name: "NODE-ED25519", namedCurve: "NODE-ED25519" }`, as implemented in Node.js 18.3.0 and earlier.
-
+The same algorithm identifier is supported in Node.js since v18.4.0.
 This package does not provide any ponyfill or polyfill for Node.js.
-The exported `Ed25519Algorithm` variable gives a suitable algorithm identifier for the current Node.js version, which helps you write code to support Node.js before and after 18.4.0.
 
 ## Features
 

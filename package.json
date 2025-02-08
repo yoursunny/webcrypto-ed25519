@@ -27,8 +27,7 @@
   "dependencies": {
     "@noble/ed25519": "^2.2.3",
     "@yoursunny/asn1": "0.0.20200718",
-    "b64u-lite": "^1.1.0",
-    "compare-versions": "6.1.1"
+    "b64u-lite": "^1.1.0"
   },
   "devDependencies": {
     "@types/minimalistic-assert": "^1.0.3",
