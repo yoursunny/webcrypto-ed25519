@@ -1,6 +1,7 @@
+/.vscode
 /*.js
 /*.map
 /*.tgz
-node_modules
 /pnpm-lock.yaml
 /test/bundle.*
+node_modules

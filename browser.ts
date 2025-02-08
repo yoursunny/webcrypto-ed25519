@@ -21,9 +21,9 @@ function asUint8Array(b: BufferSource): Uint8Array {
 
 function asArrayBuffer(b: Uint8Array): ArrayBuffer {
   if (b.byteLength === b.buffer.byteLength) {
-    return b.buffer;
+    return b.buffer as ArrayBuffer;
   }
-  return b.buffer.slice(b.byteOffset, b.byteLength);
+  return (b.buffer as ArrayBuffer).slice(b.byteOffset, b.byteLength);
 }
 
 const slot = "8d9df0f7-1363-4d2c-8152-ce4ed78f27d8";
@@ -32,7 +32,6 @@ interface Ed25519CryptoKey extends CryptoKey {
   [slot]: Uint8Array;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class Ponyfill implements Record<keyof SubtleCrypto, Function> {
   constructor(private readonly super_: SubtleCrypto) {
     this.orig_ = {} as any;
@@ -157,7 +156,6 @@ class Ponyfill implements Record<keyof SubtleCrypto, Function> {
     return this.orig_.verify.apply(this.super_, arguments);
   }
 }
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 interface Ponyfill extends Record<keyof SubtleCrypto, Function> {}
 
 export function ponyfillEd25519(subtle = crypto.subtle): SubtleCrypto {
